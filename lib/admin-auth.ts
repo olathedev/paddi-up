@@ -10,7 +10,7 @@ import { db } from "@/lib/db";
 // Owners are also organisers of every circle in the game.
 // If any env var is missing, the admin area simply doesn't exist (404).
 
-export const COOKIE = "padiup_admin";
+export const COOKIE = "padi_up_admin";
 const SESSION_HOURS = 12;
 const MAX_FAILS_PER_EMAIL = 5;
 const MAX_FAILS_PER_IP = 20;

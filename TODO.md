@@ -13,18 +13,18 @@ tick items off as you go. `.env.example` lists every variable with a short note.
 
 - [ ] `pnpm install`
 - [ ] `cp .env.example .env.local`
-- [ ] `pnpm db:start`. It starts a local Supabase, applies `supabase/migrations` and seeds a `padiup-demo` circle.
+- [ ] `pnpm db:start`. It starts a local Supabase, applies `supabase/migrations` and seeds a `padi-up-demo` circle.
 - [ ] In `.env.local`, set:
   - `DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres`
   - `NEXT_PUBLIC_SITE_URL=http://localhost:3000`
-  - `PADIUP_CIRCLE=padiup-demo`
+  - `PADIUP_CIRCLE=padi-up-demo`
   - `QUEST_SESSION_SECRET`, `ADMIN_PATH`, `ADMIN_USERS` and `ADMIN_SESSION_SECRET` (see step 5)
   - Leave both `NEXT_PUBLIC_SUPABASE_*` empty
 - [ ] `pnpm dev`, then open http://localhost:3000. With no Supabase keys, sign-in goes to `/auth/dev`, where any email works.
 
 ## 3. Supabase project
 
-- [ ] Create a Supabase account and a project named `padiup`. Pick the region closest to players (eu-west-1 is closest for Nigeria).
+- [ ] Create a Supabase account and a project named `padi-up`. Pick the region closest to players (eu-west-1 is closest for Nigeria).
   Save the database password somewhere safe.
 - [ ] Link the repo: `supabase link --project-ref <project-ref>`
 - [ ] Apply the schema: `pnpm db:push`. It applies `supabase/migrations`; `supabase/seed.sql` is for local use only.
@@ -42,7 +42,7 @@ tick items off as you go. `.env.example` lists every variable with a short note.
   `https://<project-ref>.supabase.co/auth/v1/callback`.
 - [ ] Supabase → Authentication → Sign In / Providers → Google: turn it on and paste the client ID and secret.
 - [ ] Supabase → Authentication → URL Configuration:
-  - Site URL: the live site, e.g. `https://padiup.app`
+  - Site URL: the live site, e.g. `https://padi-up.app`
   - Redirect URLs: `https://<live-domain>/auth/callback` and `http://localhost:3000/auth/callback`
 
 ## 5. Secrets to generate

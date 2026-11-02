@@ -18,7 +18,7 @@ export const cloudinaryEnabled = () => {
   return Boolean(e.cloud && e.key && e.secret);
 };
 
-const ROOT = "padiup";
+const ROOT = "padi-up";
 export type UploadKind = "avatars" | "partners";
 
 export type SignedUpload = { url: string; fields: Record<string, string> };

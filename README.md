@@ -23,7 +23,7 @@ New here? **[TODO.md](TODO.md)** lists everything to set up (Supabase, Google si
 ```bash
 pnpm install
 cp .env.example .env.local
-pnpm db:start                # local Supabase (Docker): applies supabase/migrations and seeds padiup-demo
+pnpm db:start                # local Supabase (Docker): applies supabase/migrations and seeds padi-up-demo
 pnpm dev
 ```
 

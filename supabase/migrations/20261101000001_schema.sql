@@ -1,4 +1,4 @@
--- PadiUp base tables. Safe to run more than once (pnpm db:migrate applies every migration in order).
+-- PadiUp base tables. Every later migration builds on these.
 
 create extension if not exists pgcrypto;
 

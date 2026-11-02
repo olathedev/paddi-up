@@ -1,5 +1,5 @@
 -- Agent Mode background jobs, scheduled from Supabase (Vercel Hobby crons run only daily).
--- Not part of db:migrate. Run once in the Supabase SQL editor after:
+-- Not a migration (it holds a secret). Run once in the Supabase SQL editor after:
 --   1. Database → Extensions: enable pg_cron and pg_net.
 --   2. Replace <SITE> with the live site URL and <CRON_SECRET> with the CRON_SECRET env value.
 

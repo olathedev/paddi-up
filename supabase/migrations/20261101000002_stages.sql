@@ -1,5 +1,5 @@
 -- PadiUp: the 4-stage game (socials, squad up, quiz rounds, partners).
--- Additive and safe to re-run. Applied by pnpm db:migrate.
+-- Additive and safe to re-run.
 
 alter table quest_profiles add column if not exists avatar text;
 alter table quest_profiles add column if not exists fun_fact text;

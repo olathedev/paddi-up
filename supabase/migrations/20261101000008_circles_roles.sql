@@ -1,5 +1,5 @@
 -- Circles, roles per circle, role invite links, partner managers.
--- Additive and safe to re-run. Apply BEFORE deploying the code that reads these tables.
+-- Additive and safe to re-run.
 --
 -- Membership is implicit for now: everyone with a PadiUp profile is in the one circle, so sign-in
 -- writes nothing new. Only roles above attendee are stored (no row = attendee).
@@ -93,6 +93,6 @@ alter table quest_stations
   add column if not exists updated_by uuid references quest_profiles (id) on delete set null,
   add column if not exists updated_at timestamptz;
 
--- Sees numbers across every circle (set by db/quest-07c-platform-admins.sql).
+-- Sees numbers across every circle (set by db/manual/platform-admins.sql).
 alter table quest_profiles add column if not exists is_platform_admin boolean not null default false;
 

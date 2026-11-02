@@ -1,5 +1,5 @@
 -- Partner profiles on the existing partner stations (quest_stations, kind = 'booth').
--- Additive and safe to re-run. Apply BEFORE deploying the code that reads these columns.
+-- Additive and safe to re-run.
 
 alter table quest_stations
   add column if not exists slug        text,

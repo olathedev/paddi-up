@@ -18,16 +18,24 @@ Organisers edit these at `/c/<slug>/admin` → Settings.
 
 ## Run it
 
+New here? **[TODO.md](TODO.md)** lists everything to set up (Supabase, Google sign-in, hosting, secrets).
+
 ```bash
 pnpm install
-cp .env.example .env.local   # fill in DATABASE_URL, QUEST_SESSION_SECRET and PADIUP_CIRCLE at least
-pnpm db:start                # only if using the project-local Postgres in .local-db
-pnpm db:migrate              # creates or updates every table; safe to re-run
+cp .env.example .env.local
+pnpm db:start                # local Supabase (Docker): applies supabase/migrations and seeds padiup-demo
 pnpm dev
 ```
 
-Then open `/<ADMIN_PATH>`, sign in with an `ADMIN_USERS` email and PIN, and create the circle.
+Then open `/<ADMIN_PATH>`, sign in with an `ADMIN_USERS` email and PIN, and check the circle.
 Without Supabase keys, local dev signs in by email at `/auth/dev`.
+
+## Database
+
+- Schema changes are Supabase migrations in `supabase/migrations`. Add one with `supabase migration new <name>`,
+  test it with `pnpm db:reset`, and ship it with `pnpm db:push`.
+- `db/circles/` holds ready-made circle data (settings and quiz content). Apply one with `pnpm db:apply <file>`.
+- `db/manual/` holds scripts you fill in and run by hand: first organisers, platform admins, and the X cron.
 
 ## Where things are
 
@@ -37,16 +45,9 @@ Without Supabase keys, local dev signs in by email at `/auth/dev`.
 | `app/(game)/(app)` | Signed-in pages with the bottom nav (`/home`, `/board`, `/scan`, `/stage/*` …) |
 | `app/(game)/c`, `app/(game)/p` | Circle pages (join, admin, settings) and shared profile links |
 | `app/admin-internal` | Owner admin, served only at `/<ADMIN_PATH>` (see `proxy.ts`) |
-| `app/api/cron` | X post sync and recheck, called by `db/quest-cron.sql` |
+| `app/api/cron` | X post sync and recheck, called by `db/manual/cron.sql` |
 | `lib/current-circle.ts` | The current circle and its event settings |
 | `lib/` | Game logic, sessions, DB client, uploads |
-| `db/` | SQL migrations, applied in order by `pnpm db:migrate` |
-| `db/circles/` | Ready-made circle data (settings and quiz content), applied with `pnpm db:apply <file>` |
+| `supabase/` | Supabase config, migrations and the local seed |
+| `db/` | Circle data and manual scripts (see Database) |
 
-## Database setup that isn't automatic
-
-- `db/circles/devfest-jos-2026.sql`: DevFest Jos 2026, PadiUp's first circle, with its quiz bank.
-  Apply it with `pnpm db:apply db/circles/devfest-jos-2026.sql` and set `PADIUP_CIRCLE=devfest-jos-2026`.
-- `db/quest-07b-first-organisers.sql` and `db/quest-07c-platform-admins.sql`: fill in the slug and emails,
-  then run each with `pnpm db:apply <file>`. Don't commit them with real emails.
-- `db/quest-cron.sql`: run once in the Supabase SQL editor (needs pg_cron and pg_net).

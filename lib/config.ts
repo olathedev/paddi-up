@@ -1,0 +1,103 @@
+// PadiUp + Level Up game rules. All values are PROPOSED in the developer guide;
+// tune them here.
+
+/** Points that count before event day. Points beyond it are kept and count from event day. */
+export const PRE_EVENT_CAP = 100;
+
+export const POINTS = {
+  profile: 10,
+  quiz: 5,
+  streak: 5,
+  follow: 10,
+  community: 15,
+  xPost: 5,
+  checkin: 20,
+  /** Padi Up: each person you connect with by scanning (both of you). */
+  meet: 20,
+  room: 5,
+  /** Partners: each partner stand you scan (3 times the online visit). */
+  booth: 15,
+  /** Partners: reading a partner's profile in the app, once per partner. */
+  partnerVisit: 5,
+  /** Partners: following a partner, once per partner per platform (self-claimed, like the circle follows). */
+  partnerFollow: 5,
+  recap: 10,
+  invite: 20,
+  mission: 25,
+  /** Quiz rounds: each correct answer. */
+  roundAnswer: 10,
+} as const;
+
+/** Brain Blitz: each player's clock, from the moment they tap Start. */
+export const ROUND_SECONDS = 120;
+export const ROUND_QUESTIONS = 10;
+/** ROUND_SECONDS for people to read, e.g. "2 min". */
+export const ROUND_TIME = ROUND_SECONDS % 60 ? `${ROUND_SECONDS}s` : `${ROUND_SECONDS / 60} min`;
+
+/** The four stages, in unlock order. */
+export const STAGES = [
+  { id: "socials", num: 1, title: "Follow the Signal", short: "Socials", blurb: "Follow the host on every platform.", color: "#4285F4" },
+  { id: "padiup", num: 2, title: "Padi Up", short: "Padi Up", blurb: "Meet people and scan their QR. You both score.", color: "#EA4335" },
+  { id: "quiz", num: 3, title: "Brain Blitz", short: "Quiz", blurb: `${ROUND_QUESTIONS} questions. ${ROUND_TIME}. 3 rounds.`, color: "#F9AB00" },
+  { id: "partners", num: 4, title: "Partner Link-up", short: "Partners", blurb: "Visit 3 partner stands and scan their code.", color: "#34A853" },
+] as const;
+
+export type StageId = (typeof STAGES)[number]["id"];
+
+/** People to connect with before Brain Blitz and Partners unlock. Every one after that still scores. */
+export const SQUAD_GOAL = 3;
+export const PARTNER_GOAL = 3;
+/** Seconds on a partner's profile before the online visit counts. */
+export const PARTNER_VISIT_SECONDS = 8;
+/** Padis (accepted connections) needed before Partner Link-up unlocks. */
+export const PARTNER_UNLOCK_PADIS = 3;
+/** Seconds to wait after a wrong guess about someone before trying again. */
+export const SQUAD_RETRY_SECONDS = 30;
+
+/** Preset avatars: geometric character (see AvatarArt). The id is stored on the profile. */
+const AV_COLORS = ["#4285F4", "#EA4335", "#F9AB00", "#34A853"] as const;
+const AV_HEADS = ["round", "square", "hex", "dome"] as const;
+const AV_EYES = ["dots", "visor", "code", "wink"] as const;
+export const AVATARS = Array.from({ length: 16 }, (_, i) => {
+  const row = Math.floor(i / 4);
+  return {
+    id: `a${i + 1}`,
+    head: AV_HEADS[i % 4],
+    eyes: AV_EYES[row],
+    bg: AV_COLORS[(i + row) % 4],
+    accent: AV_COLORS[(i + row + 2) % 4],
+  };
+});
+
+export const avatarFor = (id: string | null | undefined) => AVATARS.find((a) => a.id === id) ?? null;
+
+export const LIMITS = {
+  /** Counted X posts per player, in total. */
+  xPosts: 1,
+  invitesPaid: 5,
+  meetsPerHour: 40,
+  connectsPerHour: 30,
+  /** Seconds each entrance code lives; the previous code is also accepted. */
+  checkinWindow: 30,
+} as const;
+
+export const STACKS = [
+  { label: "AI", color: "#4285F4", tint: "#C3ECF6" },
+  { label: "Flutter", color: "#57CAFF", tint: "#C3ECF6" },
+  { label: "Android", color: "#34A853", tint: "#CCF6C5" },
+  { label: "Web", color: "#F9AB00", tint: "#FFE7A5" },
+  { label: "Cloud", color: "#4285F4", tint: "#C3ECF6" },
+  { label: "Security", color: "#EA4335", tint: "#F8D8D8" },
+  { label: "Design", color: "#FF7DAF", tint: "#F8D8D8" },
+  { label: "Product", color: "#F9AB00", tint: "#FFE7A5" },
+  { label: "Founder", color: "#EA4335", tint: "#F8D8D8" },
+  { label: "Student", color: "#34A853", tint: "#CCF6C5" },
+  { label: "Just exploring", color: "#FF7DAF", tint: "#F8D8D8" },
+] as const;
+
+export const STACK_LABELS: readonly string[] = STACKS.map((s) => s.label);
+
+export const TRACKS = ["AI and Agents", "Mobile", "Web", "Cloud and Security", "Product and Career"] as const;
+
+/** Tints for initials avatars, picked by a stable hash of the user id. */
+export const AVATAR_TINTS = ["#C3ECF6", "#CCF6C5", "#FFE7A5", "#F8D8D8"] as const;

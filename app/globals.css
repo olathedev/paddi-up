@@ -1,0 +1,225 @@
+@import "tailwindcss";
+
+@theme {
+  /* DevFest / Google brand palette */
+  --color-textDark: #3c3c3c;
+  --color-ink: #1e1e1e;
+  --color-paper: #f0f0f0;
+  --color-cream: #fbf7ee;
+  --color-g-blue: #4285f4;
+  --color-g-red: #ea4335;
+  --color-g-yellow: #f9ab00;
+  --color-g-green: #34a853;
+  /* halftone */
+  --color-h-blue: #57caff;
+  --color-h-green: #5cdb6d;
+  --color-h-yellow: #ffd427;
+  --color-h-red: #ff7daf;
+  /* pastel */
+  --color-p-blue: #c3ecf6;
+  --color-p-green: #ccf6c5;
+  --color-p-yellow: #ffe7a5;
+  --color-p-red: #f8d8d8;
+}
+
+@theme inline {
+  --font-sans: var(--font-google-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-clash-display), var(--font-google-sans), sans-serif;
+}
+
+/* Display type (headings, prices, big numbers): Clash Display. Everything else is Google Sans. */
+@utility type-heading {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  word-spacing: 0.06em; /* Clash's default word space is tight at display sizes */
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Keep v3 defaults: pointer cursor on buttons, gray placeholders */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+  PadiUp theme tokens. Dark by default; light when the device prefers it or the player picks it
+  (data-quest-theme on .quest-night, set before first paint). Components use these through the
+  colour utilities below (bg-surface, text-fg/60, border-fg/10 ...), never raw hex.
+*/
+@theme inline {
+  --color-bg: var(--q-bg);
+  --color-surface: var(--q-surface);
+  --color-surface-2: var(--q-surface-2);
+  --color-surface-3: var(--q-surface-3);
+  --color-fg: var(--q-fg);
+  --color-on-fg: var(--q-on-fg);
+  --color-good: var(--q-good);
+  --color-bad: var(--q-bad);
+  --color-live: var(--q-live);
+  --color-alert: var(--q-alert);
+  --color-hl: var(--q-hl);
+  --color-sky: var(--q-sky);
+  --color-tint-yellow: var(--q-tint-yellow);
+  --color-tint-red: var(--q-tint-red);
+  --color-tint-green: var(--q-tint-green);
+}
+
+.quest-night,
+.quest-dark {
+  --q-bg: #0a0a0a;
+  --q-surface: #121212;
+  --q-surface-2: #141414;
+  --q-surface-3: #2a2a2a;
+  --q-fg: #ffffff;
+  --q-fg-rgb: 255 255 255;
+  --q-on-fg: #0a0a0a;
+  --q-good: #ccf6c5;
+  --q-bad: #f8d8d8;
+  --q-live: #81c995;
+  --q-alert: #ff8a80;
+  --q-hl: #ffd427;
+  --q-sky: #57caff;
+  --q-tint-yellow: #17140a;
+  --q-tint-red: #160d0c;
+  --q-tint-green: #0f1a12;
+  --q-dots: rgb(255 255 255 / 0.045);
+  --q-st-socials: #4285f4;
+  --q-st-padiup: #ea4335;
+  --q-st-quiz: #f9ab00;
+  --q-st-partners: #34a853;
+  color-scheme: dark;
+}
+
+/* Light: brand ground #F0F0F0, ink #1E1E1E, white cards, pastel tints. All text >= 4.5:1. */
+.quest-night[data-quest-theme="light"] {
+  --q-bg: #f0f0f0;
+  --q-surface: #ffffff;
+  --q-surface-2: #ffffff;
+  --q-surface-3: #e2e2e2;
+  --q-fg: #1e1e1e;
+  --q-fg-rgb: 30 30 30;
+  --q-on-fg: #ffffff;
+  --q-good: #137333;
+  --q-bad: #b3261e;
+  --q-live: #137333;
+  --q-alert: #c5221f;
+  --q-hl: #8a5a00;
+  --q-sky: #1967d2;
+  --q-tint-yellow: #ffe7a5;
+  --q-tint-red: #f8d8d8;
+  --q-tint-green: #ccf6c5;
+  --q-dots: rgb(30 30 30 / 0.07);
+  --q-st-socials: #1967d2;
+  --q-st-padiup: #c5221f;
+  --q-st-quiz: #8a5a00;
+  --q-st-partners: #137333;
+  color-scheme: light;
+}
+
+.quest-night {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--q-bg);
+  background-image: radial-gradient(var(--q-dots) 1px, transparent 1.3px);
+  background-size: 22px 22px;
+  color: var(--q-fg);
+}
+/*
+  Contrast floor for faded text (WCAG 2.2 AA, 4.5:1 on the page and on cards). The faded
+  utilities keep their look where they already pass and are lifted where they don't:
+  dark /30-/45 -> 47%; light /50-/60 (secondary) -> 70%, /25-/45 (tertiary) -> 64%.
+*/
+.quest-night :is(.text-fg\/45, .text-fg\/40, .text-fg\/35, .text-fg\/30, .text-fg\/25),
+.quest-night :is(.placeholder\:text-fg\/35, .placeholder\:text-fg\/30, .placeholder\:text-fg\/25)::placeholder {
+  color: color-mix(in oklab, var(--q-fg) 47%, transparent);
+}
+.quest-night[data-quest-theme="light"] :is(.text-fg\/60, .text-fg\/55, .text-fg\/50) {
+  color: color-mix(in oklab, var(--q-fg) 70%, transparent);
+}
+.quest-night[data-quest-theme="light"] :is(.text-fg\/45, .text-fg\/40, .text-fg\/35, .text-fg\/30, .text-fg\/25),
+.quest-night[data-quest-theme="light"] :is(.placeholder\:text-fg\/35, .placeholder\:text-fg\/30, .placeholder\:text-fg\/25)::placeholder {
+  color: color-mix(in oklab, var(--q-fg) 64%, transparent);
+}
+
+/* Overscroll and short pages match the theme too. */
+body:has(.quest-night) {
+  background: #0a0a0a;
+}
+body:has(.quest-night[data-quest-theme="light"]) {
+  background: #f0f0f0;
+}
+
+@keyframes quest-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.quest-pop { animation: quest-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+
+@keyframes quest-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.quest-float { animation: quest-float 2.6s ease-in-out infinite; }
+
+@keyframes quest-hop {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.55; }
+  30% { transform: translateY(-8px); opacity: 1; }
+}
+.quest-hop { animation: quest-hop 0.9s ease-in-out infinite; }
+
+/* Taps fire immediately (no double-tap zoom wait) and without the grey flash. */
+.quest-night a,
+.quest-night button,
+.quest-night label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-pop, .quest-float, .quest-hop { animation: none; }
+}

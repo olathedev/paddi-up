@@ -1,0 +1,106 @@
+import "server-only";
+import type postgres from "postgres";
+import { ownerEmails } from "@/lib/admin-auth";
+import { db } from "@/lib/db";
+import { PRE_EVENT_CAP } from "./config";
+import { CURRENT_CIRCLE } from "./roles";
+import { phase } from "./time";
+import { displayName, initials } from "./validate";
+
+type Sql = postgres.Sql | postgres.TransactionSql;
+
+/** Writes one ledger row. Returns false when that (user, source) was already paid. */
+export async function award(sql: Sql, userId: string, sourceType: string, sourceId: string, points: number) {
+  const rows = await sql`
+    insert into quest_points (user_id, source_type, source_id, points)
+    values (${userId}, ${sourceType}, ${sourceId}, ${points})
+    on conflict (user_id, source_type, source_id) do nothing
+    returning id`;
+  return rows.length > 0;
+}
+
+export type BoardRow = {
+  id: string;
+  rank: number;
+  name: string;
+  initials: string;
+  stack: string[];
+  avatar: string | null;
+  score: number;
+};
+
+type Board = { at: number; phase: string; rows: BoardRow[]; byId: Map<string, BoardRow> };
+const cache = globalThis as unknown as { questBoard?: Board };
+const BOARD_TTL = 30_000;
+
+/**
+ * Everyone with points, ranked. Before event day each score is capped; ties go to whoever
+ * reached the score first. Cached for 30 seconds so 500 phones read one result.
+ * Organisers and co-organisers (and ADMIN_USERS owners) keep their points but aren't ranked:
+ * they can't win prizes.
+ */
+export async function leaderboard(): Promise<Board> {
+  const p = await phase();
+  const hit = cache.questBoard;
+  if (hit && hit.phase === p && Date.now() - hit.at < BOARD_TTL) return hit;
+
+  const capped = p === "pre";
+  const rows = await db()<{ id: string; full_name: string; is_adult: boolean; stack: string[]; avatar: string | null; score: number }[]>`
+    with t as (
+      select user_id, at, sum(points) over (partition by user_id order by at, id) as cum
+      from quest_points
+    ),
+    s as (
+      select user_id,
+             case when ${capped} then least(max(cum), ${PRE_EVENT_CAP}) else max(cum) end as score
+      from t group by user_id
+    ),
+    -- When each player first reached that score (the tie-break), in one pass.
+    r as (
+      select t.user_id, min(t.at) as reached
+      from t join s on s.user_id = t.user_id
+      where t.cum >= s.score
+      group by t.user_id
+    )
+    select p.id, p.full_name, p.is_adult, p.stack, p.avatar, s.score::int as score
+    from s
+    join r on r.user_id = s.user_id
+    join quest_profiles p on p.id = s.user_id
+    where s.score > 0
+      and lower(p.email) <> all(${ownerEmails()})
+      and not exists (
+        select 1 from quest_circle_roles cr join quest_circles cc on cc.id = cr.circle_id
+        where cc.slug = ${CURRENT_CIRCLE} and cr.user_id = p.id and cr.role in ('organiser', 'co_organiser'))
+    order by s.score desc, r.reached asc`;
+
+  const list: BoardRow[] = rows.map((r, i) => ({
+    id: r.id,
+    rank: i + 1,
+    name: displayName(r.full_name, r.is_adult),
+    initials: initials(r.full_name),
+    stack: r.stack,
+    avatar: r.avatar,
+    score: r.score,
+  }));
+  const board = { at: Date.now(), phase: p, rows: list, byId: new Map(list.map((r) => [r.id, r])) };
+  cache.questBoard = board;
+  return board;
+}
+
+/**
+ * Drop the cached board so new points show up sooner. At most once every 5 seconds per
+ * server: during a quiz round hundreds of answers a minute would otherwise rebuild it on
+ * every request. Players' own scores (myScore) are always live. `now` skips the wait (role changes).
+ */
+export const invalidateBoard = (now = false) => {
+  const hit = cache.questBoard;
+  if (hit && (now || Date.now() - hit.at > 5_000)) cache.questBoard = undefined;
+};
+
+/** A player's live score (uncached) and their total including points held over the cap. */
+export async function myScore(userId: string) {
+  const [{ total }] = await db()<{ total: number }[]>`
+    select coalesce(sum(points), 0)::int as total from quest_points where user_id = ${userId}`;
+  const score = (await phase()) === "pre" ? Math.min(total, PRE_EVENT_CAP) : total;
+  return { score, total };
+}

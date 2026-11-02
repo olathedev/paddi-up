@@ -1,0 +1,82 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { LockGlyph, RankBadge, StageBadge } from "@/components/icons";
+import AutoRefresh from "@/components/AutoRefresh";
+import RoundBoard from "@/components/RoundBoard";
+import RoundPlayer from "@/components/RoundPlayer";
+import { LockedStage } from "@/components/Stage";
+import { gameBtn, gameBtnGhost } from "@/components/ui";
+import { requireAgent } from "@/lib/auth";
+import { POINTS, ROUND_QUESTIONS } from "@/lib/config";
+import { roundBoard, roundView } from "@/lib/stages";
+
+export const metadata = { title: "Brain Blitz" };
+
+export default async function RoundPage({ params }: PageProps<"/quiz/[round]">) {
+  const round = Number((await params).round);
+  if (![1, 2, 3].includes(round)) notFound();
+  const me = await requireAgent();
+  const view = await roundView(me.id, round);
+
+  if (view.kind === "locked") return <LockedStage id="quiz" message="Scan 3 people in Padi Up to unlock Brain Blitz." />;
+
+  if (view.kind === "ready" || view.kind === "playing") return <RoundPlayer round={round} initial={view} />;
+
+  // Once you've played, or the round has closed, the page carries that round's top 10.
+  const top = view.kind === "result" || view.kind === "closed" ? await roundBoard(round) : [];
+
+  if (view.kind === "result") {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-8 text-center">
+        <span aria-hidden className="quest-pop">
+          {view.rank && view.rank <= 3 ? <RankBadge rank={view.rank} size={84} /> : <StageBadge id="quiz" color="#F9AB00" size={84} />}
+        </span>
+        <span className="text-[11px] font-bold tracking-[0.2em] text-hl">ROUND {round} COMPLETE</span>
+        <span className="type-heading text-[56px] leading-none font-bold tabular-nums">
+          {view.score}
+          <span className="text-2xl text-fg/40">/{view.total || ROUND_QUESTIONS}</span>
+        </span>
+        <span className="text-sm font-semibold text-fg/70">
+          +{view.score * POINTS.roundAnswer} points · {view.seconds}s
+          {view.rank ? ` · #${view.rank} this round` : ""}
+        </span>
+        {/* Keeps the board moving while others are still playing this round. */}
+        {view.live && <AutoRefresh seconds={20} />}
+        <div className="mt-2 w-full max-w-md">
+          <RoundBoard round={round} rows={top} meId={me.id} />
+        </div>
+        <div className="mt-2 flex w-full max-w-xs flex-col gap-3">
+          <Link href="/stage/quiz" className={gameBtn}>
+            Back to Brain Blitz
+          </Link>
+          <Link href="/home" className={gameBtnGhost}>
+            Back home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 py-10 text-center">
+      <span aria-hidden className="relative">
+        <StageBadge id="quiz" color="#F9AB00" size={80} locked />
+        <span className="absolute -right-1 -bottom-1 flex size-8 items-center justify-center rounded-full border-[3px] border-bg bg-surface-3 text-fg/70">
+          <LockGlyph size={14} />
+        </span>
+      </span>
+      <h1 className="type-heading text-2xl font-bold">{view.kind === "soon" ? `Round ${round} opens soon` : `Round ${round} is closed`}</h1>
+      <p className="max-w-xs text-sm text-fg/65">
+        {view.kind === "soon" ? "Organisers open each round live. Keep an eye on the screens." : "This round has ended."}
+      </p>
+      {view.kind === "closed" && (
+        <div className="mt-2 w-full max-w-md">
+          <RoundBoard round={round} rows={top} meId={me.id} closed />
+        </div>
+      )}
+      <Link href="/stage/quiz" className={gameBtn}>
+        Back to Brain Blitz
+      </Link>
+    </div>
+  );
+}

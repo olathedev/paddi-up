@@ -1,0 +1,7 @@
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+
+# begin() hangs through a transaction pooler with max_pipeline: 0 (see lib/db.ts).
+patchedDependencies:
+  postgres@3.4.9: patches/postgres@3.4.9.patch
